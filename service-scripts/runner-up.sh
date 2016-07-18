@@ -1,6 +1,6 @@
 # 1=PROJECT, 2=TOKEN, 3=REPLICAS(2)
 if [ ! $1 ] || [ ! $2 ]; then
- echo "Usage: $0 PROJECT TOKEN REPLICAS(2)"
+ echo "Usage: $0 PROJECT TOKEN REPLICAS(default: 2)"
  exit
 fi
 
