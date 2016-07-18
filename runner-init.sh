@@ -3,7 +3,7 @@ URL=$2
 TOKEN=$3
 CONFIG_DIR=/etc/gitlab-runner
 
-trap unregister_all SIGINT SIGTERM ERR EXIT
+trap unregister_all SIGINT SIGTERM ERR EXIT SIGKILL
 
 _get_registered_tokens(){
     local tokens
