@@ -6,6 +6,9 @@ ENV TOKEN=CI-SERVER-TOKEN
 # It could be shell
 ENV EXECUTOR=RUNNER-EXECUTOR
 
-ENTRYPOINT ["/bin/sh", "-c"]
+COPY runner-init.sh /
+RUN chmod a+x runner-init.sh
 
-CMD ["echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner; gitlab-runner register --executor $EXECUTOR -u $URL -r $TOKEN -n; /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner"]
+ENTRYPOINT ["/bin/bash", "-c"]
+
+CMD ["echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner; ./runner-init.sh $EXECUTOR $URL $TOKEN"]
