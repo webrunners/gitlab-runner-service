@@ -23,5 +23,8 @@ unregister_all(){
     done
 }
 
+
+echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
+
 gitlab-runner register --executor $EXECUTOR -u $URL -r $TOKEN -n
 /usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner

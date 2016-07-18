@@ -9,6 +9,6 @@ ENV EXECUTOR=RUNNER-EXECUTOR
 COPY runner-init.sh /
 RUN chmod a+x runner-init.sh
 
-ENTRYPOINT ["/bin/bash", "-c"]
+ENTRYPOINT []
 
-CMD ["echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner; ./runner-init.sh $EXECUTOR $URL $TOKEN"]
+CMD ["bash", "-c", "/runner-init.sh $EXECUTOR $URL $TOKEN"]
