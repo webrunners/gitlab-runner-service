@@ -1,9 +1,11 @@
-EXECUTOR=$1
-URL=$2
-TOKEN=$3
+#!/bin/bash
+
+EXECUTOR=${1:-$EXECUTOR}
+URL=${2:-$URL}
+TOKEN=${3:-$TOKEN}
 CONFIG_DIR=/etc/gitlab-runner
 
-trap unregister_all SIGINT SIGTERM ERR EXIT SIGKILL
+trap unregister_all SIGINT SIGTERM ERR EXIT SIGHUP  # cannot be caught: SIGKILL SIGSTOP
 
 _get_registered_tokens(){
     local tokens

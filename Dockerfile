@@ -11,4 +11,4 @@ RUN chmod a+x runner-init.sh
 
 ENTRYPOINT []
 
-CMD ["bash", "-c", "/runner-init.sh $EXECUTOR $URL $TOKEN"]
+CMD ["/runner-init.sh"]
