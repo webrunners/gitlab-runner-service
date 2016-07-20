@@ -1,6 +1,6 @@
 # 1=TOKEN 2=IMAGE
 if [ ! $1 ]; then
- echo "Usage: $0 TOKEN IMAGE(default: webrunners/gitlab-runner-service)"
+ echo "Usage: $0 TOKEN SERVICE(default: -ti --rm) IMAGE(default: webrunners/gitlab-runner-service)"
  exit
 fi
 

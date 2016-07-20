@@ -14,14 +14,13 @@ _get_registered_tokens(){
 }
 
 unregister(){
-    gitlab-runner unregister --url $URL --token $TOKEN $@
+    gitlab-runner unregister --url $URL --token $1
 }
 
 unregister_all(){
     local token
     for token in $(_get_registered_tokens); do
-        TOKEN=$token
-        unregister
+        unregister $token
     done
 }
 
