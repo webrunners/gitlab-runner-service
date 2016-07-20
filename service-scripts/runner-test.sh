@@ -4,6 +4,7 @@ if [ ! $1 ]; then
  exit
 fi
 
-IMAGE=${2:-webrunners/gitlab-runner-service}
+SERVICE=${2:--ti --rm}
+IMAGE=${3:-webrunners/gitlab-runner-service}
 
-docker run -ti --rm -e "TOKEN=$1" -e "EXECUTOR=shell" -e "URL=https://code.webrunners.de:443/ci" $IMAGE
+docker run $SERVICE -e "TOKEN=$1" -e "EXECUTOR=shell" -e "URL=https://code.webrunners.de:443/ci" $IMAGE

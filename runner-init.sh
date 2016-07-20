@@ -5,7 +5,7 @@ URL=${2:-$URL}
 TOKEN=${3:-$TOKEN}
 CONFIG_DIR=/etc/gitlab-runner
 
-trap unregister_all SIGINT SIGTERM ERR EXIT SIGHUP  # cannot be caught: SIGKILL SIGSTOP
+trap unregister_all SIGINT SIGTERM SIGHUP  # cannot be caught: SIGKILL SIGSTOP
 
 _get_registered_tokens(){
     local tokens
@@ -29,4 +29,4 @@ unregister_all(){
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
 
 gitlab-runner register --executor $EXECUTOR -u $URL -r $TOKEN -n
-/usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner
+/usr/bin/dumb-init /entrypoint run --user=gitlab-runner --working-directory=/home/gitlab-runner & wait ${!}
