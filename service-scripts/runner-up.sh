@@ -8,4 +8,6 @@ PROJECT=$1
 TOKEN=$2
 REPLICAS=${3:-2}
 
-docker service create --replicas $REPLICAS --name gitlab-runner-$PROJECT -e "TOKEN=$TOKEN" -e "EXECUTOR=shell" -e "URL=https://code.webrunners.de:443/ci" webrunners/gitlab-runner-service
+[[ ! $PROJECT == gitlab-runner-* ]] && PROJECT="gitlab-runner-$PROJECT"
+
+docker service create --replicas $REPLICAS --name $PROJECT -e "TOKEN=$TOKEN" -e "EXECUTOR=shell" -e "URL=https://code.webrunners.de:443/ci" webrunners/gitlab-runner-service
