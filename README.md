@@ -3,13 +3,24 @@
 
 ### Install 
 
-    rsync -av --rsync-path="sudo rsync" service-scripts/*.sh $node:/usr/local/bin/
+    rsync -cvn --rsync-path="sudo rsync" service-scripts/*.sh $node:/usr/local/bin/
+    ssh $node sudo chmod a+x /usr/local/bin/runner\*
 
 ### Create
 
 Default up scales to two replicas.
 
     ssh $node runner-up.sh PROJECT TOKEN REPLICAS(default: 2)
+
+### Privileged
+
+> This container is not managed by swarm, because docker service still lacks some flags
+> https://github.com/docker/docker/issues/24862
+
+    ssh $node runner-up-privileged.sh PROJECT TOKEN
+    ssh $node docker ps
+    ssh $node docker stop ID
+    ssh $node docker rm ID
 
 ### Other tasks
 
