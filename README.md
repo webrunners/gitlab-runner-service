@@ -1,6 +1,9 @@
 # gitlab-runner-service
 
+### Define
 
+    node=swarm-master-server
+    
 ### Install 
 
     rsync -cvn --rsync-path="sudo rsync" service-scripts/*.sh $node:/usr/local/bin/
