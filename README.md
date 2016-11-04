@@ -3,12 +3,16 @@
 ### Define
 
     node=swarm-master-server
-    
+
 ### Install 
 
     rsync -cvn --rsync-path="sudo rsync" service-scripts/*.sh $node:/usr/local/bin/
     ssh $node sudo chmod a+x /usr/local/bin/runner\*
 
+or
+
+    ansible-playbook -i inventory push.yml
+    
 ### Create
 
 Default up scales to two replicas.
