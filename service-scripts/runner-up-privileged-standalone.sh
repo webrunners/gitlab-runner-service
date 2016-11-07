@@ -6,10 +6,13 @@ fi
 
 PROJECT=$1
 TOKEN=$2
-IMAGE=${3:=webrunners/gitlab-runner-service}
+IMAGE="webrunners/gitlab-runner-service"
 
 shift 2
-[[ $3 ]] && shift
+if [[ $1 ]]; then
+    IMAGE=$1
+    shift
+fi
 
 [[ ! $PROJECT == gitlab-runner-* ]] && PROJECT="gitlab-runner-$PROJECT"
 

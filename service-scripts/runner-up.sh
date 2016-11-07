@@ -6,10 +6,13 @@ fi
 
 PROJECT=$1
 TOKEN=$2
-REPLICAS=${3:=1}
+REPLICAS=1
 
 shift 2
-[[ $3 ]] && shift
+if [[ $1 ]]; then
+    REPLICAS=$1
+    shift
+fi
 
 [[ ! $PROJECT == gitlab-runner-* ]] && PROJECT="gitlab-runner-$PROJECT"
 
