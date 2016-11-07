@@ -1,4 +1,5 @@
-from gitlab/gitlab-runner:v1.3.3
+from gitlab/gitlab-runner:latest
+#from gitlab/gitlab-runner:v1.3.3
 
 ENV URL=CI-SERVER-URL
 ENV TOKEN=CI-SERVER-TOKEN

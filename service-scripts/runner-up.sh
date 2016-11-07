@@ -1,12 +1,12 @@
 # 1=PROJECT, 2=TOKEN, 3=REPLICAS(2)
 if [ ! $1 ] || [ ! $2 ]; then
- echo "Usage: $0 PROJECT TOKEN REPLICAS(default: 2)"
+ echo "Usage: $0 PROJECT TOKEN REPLICAS(default: 1)"
  exit
 fi
 
 PROJECT=$1
 TOKEN=$2
-REPLICAS=${3:=2}
+REPLICAS=${3:=1}
 [[ $REPLICAS ]] && shift
 
 [[ ! $PROJECT == gitlab-runner-* ]] && PROJECT="gitlab-runner-$PROJECT"
