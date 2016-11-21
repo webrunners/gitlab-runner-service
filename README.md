@@ -32,19 +32,19 @@
         Use doubledash if RAW starts with option
         Any RAW appends to command
 
-### Some Service tasks
+### Scale service
 
 On scale-down the runners will be unregistered from GITLAB and removed.
 Set _FACTOR_ to zero to remove all containers instead of deleting.
-    
+Sometimes manual removing is still required. See cleanup below.
+
     ./run.sh docker service ls
     ./run.sh docker service ps NAME
     ./run.sh docker service scale NAME=FACTOR
     ./run.sh docker service update NAME
     ./run.sh docker service rm NAME
 
-
-### Old docs for reference
+### Connect to some service container and prepare ssh
 
 > https://github.com/docker/docker/issues/24862
 
