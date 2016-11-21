@@ -14,6 +14,14 @@
     NODE: dnet01.webrunners.de
     Docker version 1.12.3, build 6b644ec, experimental
 
+    → ./run.sh docker service ls
+    NODE: dnet01.webrunners.de
+    ID            NAME                                       REPLICAS  IMAGE                             COMMAND
+    xxx           gitlab-runner-name                         4/4       webrunners/gitlab-runner-service
+
+    → ./run.sh -m container -n gitlab-runner-name
+    NAME=gitlab-runner-name.1.xxxxxxxxxxxxxxxxxxx ID=xxxxxx NODE=dnet02 ./run.sh docker exec -it xxxxxx bash
+
 ### Usage
 
     Usage:
@@ -48,19 +56,10 @@ Sometimes manual removing is still required. See cleanup below.
 
 > https://github.com/docker/docker/issues/24862
 
-Get service NAME
 
-    ./run.sh docker service ls
-    SERVICE={NAME}
-    ./run.sh docker service ps $SERVICE
-
-Get all container names and shell blueprints
+Get all containers
     
-    CONTAINERS=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $2 "." $1 }'`)
-    NODES=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'`)
-    IDS=(`for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do NODE=${NODES[$NUM]} ./run.sh -q docker inspect --format="{{.Id}}" ${CONTAINERS[$NUM]}; done`)
-
-    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} ./run.sh docker exec -it $ID bash; done
+    ./run.sh -m container -n gitlab-runner-name
 
 Get a shell as gitlab-runner
 

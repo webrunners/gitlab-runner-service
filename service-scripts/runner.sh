@@ -17,7 +17,6 @@ _error(){
 }
 
 _usage(){
-    local sub
     echo "
     Usage:
         $0 [options] [--][RAW]
