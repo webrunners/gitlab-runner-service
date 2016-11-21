@@ -5,11 +5,14 @@
 
     ansible-playbook -i inventory push.yml
     
-### Create
+### Examples
 
-Default up scales to one replica.
+    → ./run.sh -q runner -v -m up -n helo -r 4 -t mytoken -e docker
+    docker service create --replicas 4 --name gitlab-runner-helo -e TOKEN=mytoken -e EXECUTOR=docker -e URL=https://code.webrunners.de:443/ci webrunners/gitlab-runner-service
 
-    ./run runner -n NAME -t TOKEN -m up
+    → ./run.sh docker -v
+    NODE: dnet01.webrunners.de
+    Docker version 1.12.3, build 6b644ec, experimental
 
 ### Usage
 
