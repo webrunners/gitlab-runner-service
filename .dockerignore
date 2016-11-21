@@ -1,1 +1,2 @@
-service-scripts/
+/service-scripts/
+/run.sh

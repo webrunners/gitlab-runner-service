@@ -3,6 +3,7 @@
 # relies on exported EXECUTOR URL TOKEN
 
 CONFIG_DIR=/etc/gitlab-runner
+OPTIONS=
 
 trap unregister_all SIGINT SIGTERM SIGHUP  # cannot be caught: SIGKILL SIGSTOP
 
@@ -24,8 +25,16 @@ unregister_all(){
 }
 
 
+touch /etc/sudoers.d/gitlab-runner;
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
+chmod 0400 /etc/sudoers.d/gitlab-runner;
 
-gitlab-runner register --executor $EXECUTOR -u $URL -r $TOKEN -n
+[[ $EXECUTOR == 'docker' ]] && OPTIONS=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
+
+gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n
 
 /entrypoint $@
+
+
+
+

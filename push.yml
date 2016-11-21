@@ -7,7 +7,7 @@
 
   tasks:
     - copy:
-        src: service-scripts/
-        dest: /usr/local/bin/
+        src: service-scripts/runner.sh
+        dest: /usr/local/bin/runner
         mode: 0755
       become: yes
