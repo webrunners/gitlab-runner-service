@@ -19,9 +19,11 @@
     ID            NAME                                       REPLICAS  IMAGE                             COMMAND
     xxx           gitlab-runner-name                         4/4       webrunners/gitlab-runner-service
 
-    → ./run.sh -m container -n gitlab-runner-name
+    → ./run.sh -v -m container -n gitlab-runner-name
     NAME=gitlab-runner-name.1.xxxxxxxxxxxxxxxxxxx ID=xxxxxx NODE=dnet02 ./run.sh docker exec -it xxxxxx bash
-
+    NODE: dnet02.webrunners.de
+    ssh -qt dnet02.webrunners.de docker exec -it xxxxxx bash
+    
 ### Usage
 
     Usage:
