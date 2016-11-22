@@ -4,7 +4,12 @@
 ### Install 
 
     ansible-playbook -i inventory push.yml
-    
+
+### About
+
+    run.sh is a local wrapper that just executes $@ on NODE
+    so, when $1 == runner, runner.sh is executed
+
 ### Examples
 
     → ./run.sh -q runner -v -m up -n helo -r 4 -t mytoken -e docker
@@ -23,7 +28,7 @@
     NAME=gitlab-runner-name.1.xxxxxxxxxxxxxxxxxxx ID=xxxxxx NODE=dnet02 ./run.sh docker exec -it xxxxxx bash
     NODE: dnet02.webrunners.de
     ssh -qt dnet02.webrunners.de docker exec -it xxxxxx bash
-    
+
 ### Usage
 
     Usage:
