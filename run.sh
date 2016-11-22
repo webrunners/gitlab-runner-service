@@ -22,7 +22,7 @@ _usage(){
 
     Options:
         -q  Quiet
-        -m  Mode        default: ssh [ssh|container]
+        -m  Mode        default: ssh [ssh|list]
         -n  Name
         -v  Dry         Command output only
     "
@@ -61,7 +61,7 @@ shift $(($OPTIND-1))
 if [[ $MODE == ssh ]]; then
     [[ $QUIET ]] || echo NODE: $SERVICE_MASTER_NODE
     ${DEBUG}ssh -qt $SERVICE_MASTER_NODE "${@}"
-elif [[ $MODE == container ]]; then
+elif [[ $MODE == list ]]; then
     [[ ! $SERVICE ]] && _error NAME required
     CONTAINERS=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $2 "." $1 }'`)
     NODES=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'`)
