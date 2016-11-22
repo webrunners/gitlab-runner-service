@@ -22,7 +22,7 @@ _usage(){
 
     Options:
         -q  Quiet
-        -m  Mode        default: ssh [ssh|list]
+        -m  Mode        default: ssh [ssh|list-containers|list-services]
         -n  Name
         -v  Dry         Command output only
     "
@@ -61,6 +61,8 @@ _ssh(){
     [[ $QUIET ]] || echo NODE: $SERVICE_MASTER_NODE
     ${DEBUG}ssh "${@}"
 }
+
+
 if [[ $MODE == ssh ]]; then
     _ssh -qt $SERVICE_MASTER_NODE ${@}
 
