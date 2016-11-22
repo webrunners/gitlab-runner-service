@@ -29,7 +29,19 @@
     NODE: dnet02.webrunners.de
     ssh -qt dnet02.webrunners.de docker exec -it xxxxxx bash
 
-### Usage
+### Usage run.sh
+
+    Usage:
+        ./run.sh [options] [--][RAW]
+
+    Options:
+        -q  Quiet
+        -m  Mode        default: ssh [ssh|list]
+        -n  Name
+        -v  Dry         Command output only
+
+
+### Usage runner.sh
 
     Usage:
         /usr/local/bin/runner [options] [--][RAW]
