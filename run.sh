@@ -75,7 +75,7 @@ elif [[ $MODE == list-containers ]]; then
     NODES=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'`)
     IDS=(`for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do NODE=${NODES[$NUM]} ./run.sh -q docker inspect --format="{{.Id}}" ${CONTAINERS[$NUM]}; done`)
 
-    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} ./run.sh docker exec -it $ID bash; NODE=${NODES[$NUM]} ./run.sh -v docker exec -it $ID bash; echo; done
+    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} ./run.sh docker exec -it $ID bash; NODE=${NODES[$NUM]} ./run.sh -qv docker exec -it $ID bash; echo; done
 else
     echo unknown mode: $MODE
     exit 1
