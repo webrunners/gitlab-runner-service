@@ -126,18 +126,25 @@ Remove dangling images
 
 For manual clean up GITLAB, you could use the gitlab API
 
+
+#### By ascending id
+
     for runner in {i..n}; do curl -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"; done
 
 #### Projectwise
 
  Get projects id
 
-    curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects?search=$NAME" | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['id'])"  # 0 is the first result in array
+    ID=`curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects?search=$NAME" | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['id'])"`  # 0 is the first search result in array
 
  Get projects runners
 
-    RUNNERS=$(curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects/5/runners" | python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];")
+    RUNNERS=($(curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects/$ID/runners" | python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];"))
+
+ Get description
+
+    for runner in ${RUNNERS[@]}; do curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"|python3 -c "import sys, json; print(json.load(sys.stdin)['description'])"; done
 
  Delete them
 
-    for runner in $RUNNERS; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/${runner[@]}"; done
+    for runner in ${RUNNERS[@]}; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"; done
