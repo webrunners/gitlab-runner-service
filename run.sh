@@ -11,7 +11,7 @@ SERVICE_MASTER_NODE=${NODE:=dnet01.webrunners.de}
 _error(){
     echo
     echo "[$BASH_LINENO] $@" 1>&2
-    _usage
+    echo Help: $0 -h
     exit 1
 }
 
@@ -57,17 +57,23 @@ done
 shift $(($OPTIND-1))
 
 
-
-if [[ $MODE == ssh ]]; then
+_ssh(){
     [[ $QUIET ]] || echo NODE: $SERVICE_MASTER_NODE
-    ${DEBUG}ssh -qt $SERVICE_MASTER_NODE "${@}"
-elif [[ $MODE == list ]]; then
+    ${DEBUG}ssh "${@}"
+}
+if [[ $MODE == ssh ]]; then
+    _ssh -qt $SERVICE_MASTER_NODE ${@}
+
+elif [[ $MODE == list-services ]]; then
+    _ssh -qt $SERVICE_MASTER_NODE docker service ls
+
+elif [[ $MODE == list-containers ]]; then
     [[ ! $SERVICE ]] && _error NAME required
     CONTAINERS=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $2 "." $1 }'`)
     NODES=(`./run.sh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'`)
     IDS=(`for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do NODE=${NODES[$NUM]} ./run.sh -q docker inspect --format="{{.Id}}" ${CONTAINERS[$NUM]}; done`)
 
-    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} ./run.sh docker exec -it $ID bash; ./run.sh -v docker exec -it $ID bash; echo; done
+    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} ./run.sh docker exec -it $ID bash; NODE=${NODES[$NUM]} ./run.sh -v docker exec -it $ID bash; echo; done
 else
     echo unknown mode: $MODE
     exit 1
