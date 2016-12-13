@@ -87,7 +87,7 @@ Sometimes manual removing is still required. See cleanup below.
 
 ## Cleanup
 
-Remove the runner
+Remove specific container
 
     ./manage/swarm.sh -m ssh docker kill $ID
     ./manage/swarm.sh -m ssh docker rm $ID
@@ -104,16 +104,18 @@ Remove dangling images
 
     ./manage/swarm.sh -m ssh docker rmi \$\(docker images -qa -f 'dangling=true'\)
 
+### GitLab API
+
 For manual clean up GITLAB runners, you could use the gitlab API
 
-TOKEN=GitLab-Token
-GITLAB=GitLab-Url
+    TOKEN=GitLab-Token
+    GITLAB=GitLab-Url
 
-### By ascending id
+#### By ascending id
 
     for runner in {i..n}; do curl -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
 
-### Projectwise
+#### Projectwise
 
  Get projects id
 
