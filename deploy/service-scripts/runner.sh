@@ -25,7 +25,7 @@ _usage(){
         -e  Executor    default: shell
         -h  This help
         -i  Image       default: webrunners/gitlab-runner-service
-        -m  Mode        [raw|up|up-privileged|up-privileged-service]
+        -m  Mode        [create|up|up-privileged|up-privileged-service]
         -n  Name
         -r  Replicas    default: 1
         -t  Token
@@ -73,7 +73,7 @@ while getopts e:t:r:n:i:m:hv OPT; do
 done
 shift $(($OPTIND-1))
 
-raw(){
+create(){
     ${DEBUG}docker service create --replicas $REPLICAS --name $NAME $@
 }
 up(){

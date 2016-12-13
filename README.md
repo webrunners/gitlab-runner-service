@@ -1,45 +1,42 @@
 # gitlab-runner-service
 
+## About
 
-### Install 
+    Helper scripts for swarm mode service creation using an customized gitlab-runner Docker image.
 
-    ansible-playbook -i inventory push.yml
+## Helper scripts
 
-### About
+### runner.sh
 
-    run.sh is a local wrapper that just executes $@ on NODE
-    so, when $1 == runner, runner.sh is executed
+    runner.sh is installed as command `runner` on the swarm-master.
+    It wraps commands for docker service creation
 
-### Examples
+#### Install
 
-    → ./run.sh -q runner -v -m up -n helo -r 4 -t mytoken -e docker
-    docker service create --replicas 4 --name gitlab-runner-helo -e TOKEN=mytoken -e EXECUTOR=docker -e URL=https://code.webrunners.de:443/ci webrunners/gitlab-runner-service
+    cd deploy
+    ansible-playbook -i inventory deploy.yml
 
-    → ./run.sh docker -v
-    NODE: dnet01.webrunners.de
-    Docker version 1.12.3, build 6b644ec, experimental
+### manage/swarm.sh
 
-    → ./run.sh docker service ls
-    NODE: dnet01.webrunners.de
-    ID            NAME                                       REPLICAS  IMAGE                             COMMAND
-    xxx           gitlab-runner-name                         4/4       webrunners/gitlab-runner-service
+    manage/swarm.sh is a local command that just executes commands on NODE.
+    When mode=runner, runner.sh is executed on the swarm-master.
+    
+    Set environment variable NODE on the commandline or in the file `.conf`
 
-    → ./run.sh -v -m list -n gitlab-runner-name
-    NAME=gitlab-runner-name.1.xxxxxxxxxxxxxxxxxxx ID=xxxxxx NODE=dnet02 ./run.sh docker exec -it xxxxxx bash
-    NODE: dnet02.webrunners.de
-    ssh -qt dnet02.webrunners.de docker exec -it xxxxxx bash
-
-### Usage run.sh
+### Usage manage/swarm.sh
 
     Usage:
-        ./run.sh [options] [--][RAW]
+        ./manage/swarm.sh [options] [--][RAW]
 
     Options:
-        -q  Quiet
-        -m  Mode        default: ssh [ssh|list]
-        -n  Name
+        -q  Quiet       Suppress informational output
+        -m  Mode        default: ssh [list-containers|list-services|runner|ssh]
+        -n  Name        The name of the service to manage
         -v  Dry         Command output only
 
+    RAW:
+        Use the doubledash -- if RAW starts with option.
+        For mode=runner you have to use the -- before any runner options.
 
 ### Usage runner.sh
 
@@ -50,7 +47,7 @@
         -e  Executor    default: shell
         -h  This help
         -i  Image       default: webrunners/gitlab-runner-service
-        -m  Mode        [raw|up|up-privileged|up-privileged-service]
+        -m  Mode        [create|up|up-privileged|up-privileged-service]
         -n  Name
         -r  Replicas    default: 1
         -t  Token
@@ -59,92 +56,118 @@
         Use doubledash if RAW starts with option
         Any RAW appends to command
 
+
+### Examples
+
+    → ./manage/swarm.sh -q -m runner -- -v -m up -n helo -r 4 -t mytoken -e docker
+
+    # the same but through mode=ssh which is default
+    → ./manage/swarm.sh -q runner -v -m up -n helo -r 4 -t mytoken -e docker
+    
+    → ./manage/swarm.sh -q runner -vm create
+    
+    → ./manage/swarm.sh -m ssh docker -v
+
+    → ./manage/swarm.sh -m ssh docker service ls
+
+    → ./manage/swarm.sh -m list-containers -n gitlab-runner-name
+
+
 ### Scale service
 
 On scale-down the runners will be unregistered from GITLAB and removed.
 Set _FACTOR_ to zero to remove all containers instead of deleting.
 Sometimes manual removing is still required. See cleanup below.
 
-    ./run.sh docker service ls
-    ./run.sh docker service ps NAME
-    ./run.sh docker service scale NAME=FACTOR
-    ./run.sh docker service update NAME
-    ./run.sh docker service rm NAME
+    ./manage/swarm.sh -m ssh docker service ls
+    ./manage/swarm.sh -m ssh docker service ps NAME
+    ./manage/swarm.sh -m ssh docker service scale NAME=FACTOR
+    ./manage/swarm.sh -m ssh docker service update NAME
+    ./manage/swarm.sh -m ssh docker service rm NAME
 
-### Connect to some service container and prepare ssh
-
-> https://github.com/docker/docker/issues/24862
-
-
-Get all containers
-    
-    ./run.sh -m list -n gitlab-runner-name
-
-Get a shell as gitlab-runner
-
-    ./run.sh docker exec -it $CONTAINER bash
-    su gitlab-runner
-    sudo -Hu gitlab-runner
-
-Copy the ssh.key.pub shown in .gitlab-ci.yml build output of stage setup >> $target:.ssh/authorized_keys 
-    
-    target=sub.dev.webrunners.de
-
-    ./run.sh docker exec -i $ID cat /home/gitlab-runner/.ssh/id_rsa.pub | ssh $target 'tee -a /home/webrunners/.ssh/authorized_keys'
-    ssh $target cat /home/webrunners/.ssh/authorized_keys
-
-Test ssh and add fingerprint
-
-    ./run.sh docker exec -it $ID sudo -Hu gitlab-runner ssh $target
-
-Login to the docker registry
-
-> Must not be done anymore as the gitlab-ci provides a login token on the fly.
-> Only for reference
-
-    ./run.sh docker exec -it $ID sudo -Hu gitlab-runner docker login registry.webrunners.de
-    ./run.sh docker exec -i $ID cat /home/gitlab-runner/.docker/config.json
+## Cleanup
 
 Remove the runner
 
-    ./run.sh docker kill $ID
-    ./run.sh docker rm $ID
+    ./manage/swarm.sh -m ssh docker kill $ID
+    ./manage/swarm.sh -m ssh docker rm $ID
 
 Remove dangling volumes
 
 > docker volume rm $(docker volume ls -qf dangling=true)
 
-    ./run.sh docker volume rm \$\(docker volume ls -qf dangling=true\)
+    ./manage/swarm.sh -m ssh docker volume rm \$\(docker volume ls -qf dangling=true\)
 
 Remove dangling images
 
 > docker rmi $(docker images -qa -f 'dangling=true')
 
-    ./run.sh docker rmi \$\(docker images -qa -f 'dangling=true'\)
+    ./manage/swarm.sh -m ssh docker rmi \$\(docker images -qa -f 'dangling=true'\)
 
-### Cleanup
+For manual clean up GITLAB runners, you could use the gitlab API
 
-For manual clean up GITLAB, you could use the gitlab API
+TOKEN=GitLab-Token
+GITLAB=GitLab-Url
 
+### By ascending id
 
-#### By ascending id
+    for runner in {i..n}; do curl -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
 
-    for runner in {i..n}; do curl -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"; done
-
-#### Projectwise
+### Projectwise
 
  Get projects id
 
-    ID=`curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects?search=$NAME" | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['id'])"`  # 0 is the first search result in array
+    ID=`curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/projects?search=$NAME" | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['id'])"`  # 0 is the first search result in array
 
  Get projects runners
 
-    RUNNERS=($(curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/projects/$ID/runners" | python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];"))
+    RUNNERS=($(curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/projects/$ID/runners" | python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];"))
 
  Get description
 
-    for runner in ${RUNNERS[@]}; do curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"|python3 -c "import sys, json; print(json.load(sys.stdin)['description'])"; done
+    for runner in ${RUNNERS[@]}; do curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"|python3 -c "import sys, json; print(json.load(sys.stdin)['description'])"; done
 
  Delete them
 
-    for runner in ${RUNNERS[@]}; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://code.webrunners.de/api/v3/runners/$runner"; done
+    for runner in ${RUNNERS[@]}; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
+
+
+## Connect to some service container and prepare ssh
+
+> Deprecated
+> improved .gitlab-ci.yml
+
+Get all containers
+    
+    ./manage/swarm.sh -m list-containers -n gitlab-runner-name
+
+Get a shell as gitlab-runner
+
+    ./manage/swarm.sh docker exec -it $CONTAINER bash
+    su gitlab-runner
+    sudo -Hu gitlab-runner
+
+Copy the ssh.key.pub shown in .gitlab-ci.yml build output of stage setup >> $target:.ssh/authorized_keys 
+    
+    TARGET=sub.dev.webrunners.de
+    ID=container_id
+
+    ./manage/swarm.sh -m ssh docker exec -i $ID cat /home/gitlab-runner/.ssh/id_rsa.pub | ssh $TARGET 'tee -a /home/webrunners/.ssh/authorized_keys'
+    ssh $TARGET cat /home/webrunners/.ssh/authorized_keys
+
+Test ssh and add fingerprint
+
+    ./manage/swarm.sh -m ssh docker exec -it $ID sudo -Hu gitlab-runner ssh $TARGET
+
+Login to the docker registry
+
+> Deprcated
+> Has not to be done anymore as the gitlab-ci provides a login token on the fly.
+> Only for reference
+
+    ./manage/swarm.sh docker exec -it $ID sudo -Hu gitlab-runner docker login registry.webrunners.de
+    ./manage/swarm.sh docker exec -i $ID cat /home/gitlab-runner/.docker/config.json
+
+## Follow ups
+
+> https://github.com/docker/docker/issues/24862
