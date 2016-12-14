@@ -4,7 +4,7 @@ set -e -o pipefail
 cd "$(dirname "$0")"
 
 DEBUG=
-MODE=ssh
+MODE=service
 QUIET=
 SERVICE_MASTER_NODE=$NODE
 if [[ ! $SERVICE_MASTER_NODE ]]; then
@@ -35,7 +35,7 @@ _usage(){
 
     Options:
         -q  Quiet       Suppress informational output
-        -m  Mode        default: ssh [list-containers|list-services|runner|ssh]
+        -m  Mode        default: service [list-containers|list-services|runner|service|ssh]
         -n  Name        The name of the service to manage
         -v  Dry         Command output only
 
@@ -81,6 +81,9 @@ _ssh(){
 
 if [[ $MODE == runner ]]; then
     _ssh -qt $SERVICE_MASTER_NODE runner ${@}
+
+elif [[ $MODE == service ]]; then
+    _ssh -qt $SERVICE_MASTER_NODE docker service ${@}
 
 elif [[ $MODE == ssh ]]; then
     _ssh -qt $SERVICE_MASTER_NODE ${@}
