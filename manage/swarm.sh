@@ -35,13 +35,21 @@ _usage(){
 
     Options:
         -q  Quiet       Suppress informational output
-        -m  Mode        default: service [list-containers|list-services|runner|service|ssh]
+        -m  Mode        default: service [docker|list-containers|list-services|runner|service|ssh]
         -n  Name        The name of the service to manage
         -v  Dry         Command output only
 
     RAW:
         Use the doubledash -- if RAW starts with option.
         For mode=runner you have to use the -- before any runner options.
+
+    Modes:
+        docker          Execute docker binary on node
+        list-containers List connection infos for services containers
+        list-services   service ls
+        runner          Execute runner.sh on node
+        service         Execute docker service command on node
+        ssh             Plain ssh
     "
     echo
     exit 0
@@ -81,6 +89,9 @@ _ssh(){
 
 if [[ $MODE == runner ]]; then
     _ssh -qt $SERVICE_MASTER_NODE runner ${@}
+
+elif [[ $MODE == docker ]]; then
+    _ssh -qt $SERVICE_MASTER_NODE docker ${@}
 
 elif [[ $MODE == service ]]; then
     _ssh -qt $SERVICE_MASTER_NODE docker service ${@}
