@@ -2,9 +2,10 @@
 set -e -o pipefail
 
 EXECUTOR=shell
-IMAGE=webrunners/gitlab-runner-service
+IMAGE=webrunners/gitlab-runner-service:latest
 MODE=
 NAME=
+NETWORK=bridge
 REPLICAS=1
 TOKEN=
 DEBUG=
@@ -39,7 +40,7 @@ _usage(){
 }
 
 
-while getopts e:t:r:n:i:m:hv OPT; do
+while getopts e:t:r:n:i:m:x:hv OPT; do
     case $OPT in
         t)
             TOKEN=$OPTARG
@@ -58,6 +59,9 @@ while getopts e:t:r:n:i:m:hv OPT; do
         ;;
         m)
             MODE=$OPTARG
+        ;;
+        x)
+            NETWORK=$OPTARG
         ;;
         h)
             _usage
@@ -84,7 +88,7 @@ up-privileged-service(){
     ${DEBUG}docker service create --replicas=$REPLICAS --name $NAME --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock -e "TOKEN=$TOKEN" -e "EXECUTOR=$EXECUTOR" -e "URL=https://code.webrunners.de:443/ci" $@ $IMAGE
 }
 up-privileged(){
-    ${DEBUG}docker run -d --restart always -v /var/run/docker.sock:/var/run/docker.sock --name $NAME -e "TOKEN=$TOKEN" -e "EXECUTOR=$EXECUTOR" -e "URL=https://code.webrunners.de:443/ci" $@ $IMAGE
+    ${DEBUG}docker run -d --restart always --network $NETWORK -v /var/run/docker.sock:/var/run/docker.sock --name $NAME -e "TOKEN=$TOKEN" -e "EXECUTOR=$EXECUTOR" -e "URL=https://code.webrunners.de:443/ci" $@ $IMAGE
 }
 
 [[ ! $MODE ]] && _error Mode required
