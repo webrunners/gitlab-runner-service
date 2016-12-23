@@ -112,7 +112,7 @@ elif [[ $MODE == list-containers ]]; then
     NODES=(`$manage -m ssh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'||_error No nodes`)
     IDS=(`for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do NODE=${NODES[$NUM]} $manage -m ssh -q docker inspect --format="{{.Id}}" ${CONTAINERS[$NUM]}; done`)
 
-    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do [[ $QUIET ]] || echo $NUM; ID=`echo ${IDS[$NUM]}|cut -c-8`; echo NAME=${CONTAINERS[$NUM]} ID=$ID NODE=${NODES[$NUM]} $manage -m ssh docker exec -it $ID bash; NODE=${NODES[$NUM]} $manage -m ssh -qv docker exec -it $ID bash; echo; done
+    for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do [[ $QUIET ]] || echo $NUM; ID=`echo ${IDS[$NUM]}|cut -c-8`; echo ID=$ID; echo NAME=${CONTAINERS[$NUM]}; echo NODE=${NODES[$NUM]} $0 -m ssh docker exec -it $ID bash; NODE=${NODES[$NUM]} $manage -m ssh -qv docker exec -it $ID bash; echo; done
 else
     _error unknown mode: $MODE
 fi
