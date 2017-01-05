@@ -11,7 +11,7 @@ if [[ ! $SERVICE_MASTER_NODE ]]; then
     . .conf
     SERVICE_MASTER_NODE=$NODE
     if [[ ! $SERVICE_MASTER_NODE ]]; then
-        echo Set NODE
+        echo Set NODE in .conf
         exit 1
     fi
 fi
