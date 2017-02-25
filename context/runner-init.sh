@@ -24,6 +24,7 @@ unregister_all(){
     done
 }
 
+[[ $SERVICE ]] && [[ -f /var/run/secrets/$SERVICE ]] && . /var/run/secrets/$SERVICE
 
 touch /etc/sudoers.d/gitlab-runner;
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
