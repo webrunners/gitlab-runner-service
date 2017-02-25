@@ -133,6 +133,18 @@ For manual clean up GITLAB runners, you could use the gitlab API
 
     for runner in ${RUNNERS[@]}; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
 
+#### Delete all runners
+
+Scale down all services
+
+    for service in `docker service ls|grep -v NAME|awk '{print $2}'`; do docker service scale $service=0; done
+
+Maybe run it multiple times, as max 100 runners would be catched within one run
+
+    for runner in `curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/all?per_page=100"|python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];"`; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
+
+Scale up services again
+
 
 ## Connect to some service container and prepare ssh
 

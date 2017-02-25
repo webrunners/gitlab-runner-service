@@ -108,7 +108,7 @@ elif [[ $MODE == list-services ]]; then
 elif [[ $MODE == list-containers ]]; then
     [[ ! $SERVICE ]] && _error NAME required
     [[ $DEBUG ]] && _error Dry mode not available for list-containers
-    CONTAINERS=(`$manage -m ssh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $2 "." $1 }'||_error No containers for $SERVICE`)
+    CONTAINERS=(`$manage -m ssh docker service ps --no-trunc -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $2 "." $1 }'||_error No containers for $SERVICE`)
     NODES=(`$manage -m ssh docker service ps -f desired-state=running $SERVICE|grep $SERVICE|awk '{ print $4 }'||_error No nodes`)
     IDS=(`for NUM in $(seq 0 $((${#CONTAINERS[@]}-1))); do NODE=${NODES[$NUM]} $manage -m ssh -q docker inspect --format="{{.Id}}" ${CONTAINERS[$NUM]}; done`)
 
