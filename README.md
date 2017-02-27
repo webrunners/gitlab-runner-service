@@ -133,18 +133,39 @@ For manual clean up GITLAB runners, you could use the gitlab API
 
     for runner in ${RUNNERS[@]}; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
 
+
+#### Install resty
+
+    brew install jq jsawk  # resty
+    wget https://raw.githubusercontent.com/micha/resty/master/resty
+    chmod a+x resty; mv resty /usr/local/bin
+
+    source resty
+    resty https://$GITLAB/api/v3 -H "PRIVATE-TOKEN: $APITOKEN"
+    GET /projects/289 |jsawk -n 'out(this.name + " " + this.runners_token)'
+
 #### Delete all runners
 
 Scale down all services
 
     for service in `docker service ls|grep -v NAME|awk '{print $2}'`; do docker service scale $service=0; done
 
-Maybe run it multiple times, as max 100 runners would be catched within one run
+Delete all
 
-    for runner in `curl -s -X GET -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/all?per_page=100"|python3 -c "import sys, json; [print(r['id']) for r in json.load(sys.stdin)];"`; do curl -s -X DELETE -H "PRIVATE-TOKEN: $TOKEN" "https://$GITLAB/api/v3/runners/$runner"; done
+    n=1; runners=`GET /runners/all -q "per_page=100&page=$n"`; while `echo $runners|jsawk -a 'return this.length > 0'` == true; do for id in `echo $runners|jsawk -n 'out(this.id)'`; do echo DELETE /runners/$id; done; n=$((n+1)); runners=`GET /runners/all -q "per_page=100&page=$n"`; done
+
+Lock all
+
+    n=1; runners=`GET /runners/all -q "per_page=100&page=$n"`; while `echo $runners|jsawk -a 'return this.length > 0'` == true; do for id in `echo $runners|jsawk -n 'out(this.id)'`; do PUT /runners/$id --form "locked=true"; done; n=$((n+1)); runners=`GET /runners/all -q "per_page=100&page=$n"`; done
 
 Scale up services again
 
+#### Create docker secrets for all GitLab tagged projects
+
+In GitLab project settings, tag all projects that need a runner with: "runner-enabled"
+Query them
+
+    n=1; projects=`GET /projects/all -q "archived=no&order_by=id&per_page=100&page=$n"`; while `echo $projects|jsawk -a 'return this.length > 0'` == true; do for id in `echo $projects|jsawk -n 'if (this.tag_list.indexOf("runner-enabled") > -1) out(this.id)'`; do project=`GET /projects/$id`; SERVICE=`echo $project|jsawk -n 'out(this.path)'`; TOKEN=`echo $project|jsawk -n 'out(this.runners_token)'`; docker secret rm $SERVICE &>/dev/null||true; printf '%s\n%s\n' EXECUTOR=shell URL=https://code.webrunners.de:443/ci TOKEN=$TOKEN | docker secret create $SERVICE -; done; n=$((n+1)); projects=`GET /projects/all -q "archived=no&order_by=id&per_page=100&page=$n"`; done
 
 ## Connect to some service container and prepare ssh
 
