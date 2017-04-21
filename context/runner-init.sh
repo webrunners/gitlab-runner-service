@@ -25,6 +25,7 @@ unregister_all(){
 }
 
 [[ $SERVICE ]] && [[ -f /var/run/secrets/$SERVICE ]] && . /var/run/secrets/$SERVICE
+[[ $DESCRIPTION ]] || DESCRIPTION=${SERVICE}_`hostname`
 
 touch /etc/sudoers.d/gitlab-runner;
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
@@ -32,7 +33,8 @@ chmod 0400 /etc/sudoers.d/gitlab-runner;
 
 [[ $EXECUTOR == 'docker' ]] && OPTIONS=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
 
-gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n
+
+gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n --description "$DESCRIPTION"
 
 /entrypoint $@
 
