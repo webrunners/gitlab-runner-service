@@ -34,7 +34,7 @@ chmod 0400 /etc/sudoers.d/gitlab-runner;
 [[ $EXECUTOR == 'docker' ]] && OPTIONS=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
 
 
-gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n --description "$DESCRIPTION"
+gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n --description "$DESCRIPTION" --locked
 
 /entrypoint $@
 

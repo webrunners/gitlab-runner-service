@@ -3,8 +3,7 @@ from gitlab/gitlab-runner:latest
 ENV URL=CI-SERVER-URL
 ENV TOKEN=CI-SERVER-TOKEN
 
-# It could be shell
-ENV EXECUTOR=RUNNER-EXECUTOR
+ENV EXECUTOR=shell
 
 RUN sudo -E apt-get install -yq --no-install-recommends curl ca-certificates\
  && [ ! -f /usr/bin/docker ] && (curl -sSL https://get.docker.com/ | sudo sh)\
