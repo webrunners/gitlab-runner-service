@@ -5,11 +5,10 @@
 CONFIG_DIR=/etc/gitlab-runner
 OPTIONS=
 
-trap unregister_all SIGINT SIGTERM SIGHUP  # cannot be caught: SIGKILL SIGSTOP
 
 _get_registered_tokens(){
     local tokens
-    tokens=$(cat $CONFIG_DIR/config.toml | grep token | cut -d\" -f2)
+    tokens=$(grep token $CONFIG_DIR/config.toml | cut -d\" -f2)
     echo $tokens
 }
 
@@ -23,6 +22,8 @@ unregister_all(){
         unregister $token
     done
 }
+
+trap unregister_all SIGINT SIGTERM SIGHUP EXIT # cannot be caught: SIGKILL SIGSTOP
 
 [[ $SERVICE ]] && [[ -f /var/run/secrets/$SERVICE ]] && . /var/run/secrets/$SERVICE
 [[ $DESCRIPTION ]] || DESCRIPTION=${SERVICE}_`hostname`
