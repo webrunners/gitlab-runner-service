@@ -31,6 +31,7 @@ trap unregister_all SIGINT SIGTERM SIGHUP EXIT # cannot be caught: SIGKILL SIGST
 touch /etc/sudoers.d/gitlab-runner;
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
 chmod 0400 /etc/sudoers.d/gitlab-runner;
+usermod -a -G docker gitlab-runner
 
 [[ $EXECUTOR == 'docker' ]] && OPTIONS=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
 
