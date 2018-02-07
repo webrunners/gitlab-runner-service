@@ -4,6 +4,7 @@
 
 CONFIG_DIR=/etc/gitlab-runner
 OPTIONS=
+TAG_LIST=
 
 
 _get_registered_tokens(){
@@ -27,14 +28,13 @@ trap unregister_all SIGINT SIGTERM SIGHUP EXIT # cannot be caught: SIGKILL SIGST
 
 [[ $SERVICE ]] && [[ -f /var/run/secrets/$SERVICE ]] && . /var/run/secrets/$SERVICE
 [[ $DESCRIPTION ]] || DESCRIPTION=${SERVICE}_`hostname`
+[[ $EXECUTOR == 'docker' ]] && OPTIONS+=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
+[[ $TAG_LIST ]] && OPTIONS+=" --tag-list $TAG_LIST"
 
 touch /etc/sudoers.d/gitlab-runner;
 echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner;
 chmod 0400 /etc/sudoers.d/gitlab-runner;
 usermod -a -G docker gitlab-runner
-
-[[ $EXECUTOR == 'docker' ]] && OPTIONS=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
-
 
 gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n --description "$DESCRIPTION" --locked
 
