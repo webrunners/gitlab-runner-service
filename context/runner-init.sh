@@ -4,7 +4,6 @@
 
 CONFIG_DIR=/etc/gitlab-runner
 OPTIONS=
-TAG_LIST=
 
 
 _get_registered_tokens(){
