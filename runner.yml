@@ -1,0 +1,15 @@
+version: "3.1"
+services:
+
+  runner:
+    image: webrunners/gitlab-runner-service:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - SERVICE
+      - EXECUTOR
+      - URL
+      - TOKEN
+      - TAG_LIST
+    deploy:
+      replicas: 1
