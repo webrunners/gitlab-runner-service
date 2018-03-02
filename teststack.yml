@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+
+  main:
+    image: jwilder/whoami
+    networks:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 50M
+        reservations:
+          cpus: '0.05'
+          memory: 10M
+      replicas: $REPLICAS
+      labels:
+        com.df.notify: "true"
+        com.df.service_port: "$SERVICE_PORT"
+        com.df.domain: "$DOMAIN"
+
+networks:
+  proxy:
+    external: true
+
+# secrets:
+#   main.htpasswd:
+#     external: true
