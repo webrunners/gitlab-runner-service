@@ -13,10 +13,10 @@ services:
         reservations:
           cpus: '0.05'
           memory: 10M
-      replicas: $REPLICAS
+      replicas: 3
       labels:
         com.df.notify: "true"
-        com.df.service_port: $SERVICE_PORT
+        com.df.service_port: "$SERVICE_PORT"
         com.df.domain: "$DOMAIN"
 
 networks:
