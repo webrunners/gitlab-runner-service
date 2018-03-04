@@ -1,4 +1,4 @@
-from gitlab/gitlab-runner:latest
+FROM gitlab/gitlab-runner:latest
 
 ENV TERM=linux TZ=Europe/Berlin
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
