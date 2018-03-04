@@ -11,7 +11,16 @@ RUN apt-get update -y && apt-get install -yq --no-install-recommends curl ca-cer
  && chmod a+x /usr/local/bin/docker\
  && rm -r docker $DOCKER_FILE\
  && curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose\
- && chmod +x /usr/local/bin/docker-compose
+ && chmod +x /usr/local/bin/docker-compose\
+ && apt-get -yqq clean &&\
+    apt-get -yqq autoclean &&\
+    apt-get -yqq autoremove &&\
+    rm -rf /var/lib/apt/* &&\
+    rm -rf /var/lib/cache/* &&\
+    rm -rf /var/lib/log/* &&\
+    rm -rf /var/tmp/* &&\
+    rm -rf /tmp/*
+
 
 ENV URL=CI-SERVER-URL TOKEN=CI-SERVER-TOKEN EXECUTOR=shell
 COPY ./context/runner-init.sh /
