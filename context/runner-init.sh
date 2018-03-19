@@ -35,9 +35,11 @@ CONFIG_DIR=/etc/gitlab-runner
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
 if [[ ! $SERVICE ]]; then
+    # use stack name
     SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
     if [[ $SERVICE != *_runner ]]; then
-        SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
+        #SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
+        SERVICE=${SERVICE}_runner
     fi
 fi
 
