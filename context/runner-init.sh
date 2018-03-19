@@ -44,8 +44,7 @@ fi
 DESCRIPTION=${SERVICE:?SERVICE var required}_`hostname`
 
 # Ensure config/secret is bound to myself
-docker service update $SERVICE --config-add runner||true
-docker service update $SERVICE --secret-add $SERVICE||true
+docker service update $SERVICE --config-rm runner --secret-rm $SERVICE --config-add runner --secret-add $SERVICE||true
 
 # Source some variables
 . /var/run/secrets/$SERVICE || true
