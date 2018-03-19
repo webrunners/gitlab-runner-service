@@ -31,26 +31,24 @@ usermod -a -G docker gitlab-runner
 
 
 CONFIG_DIR=/etc/gitlab-runner
+# STACK=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
 
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
-if [[ ! $SERVICE ]]; then
-    # use stack name
-    SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
-    if [[ $SERVICE != *_runner ]]; then
-        #SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
-        SERVICE=${SERVICE}_runner
-    fi
+if [[ ! "${SERVICE:-}" ]]; then
+    SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
 fi
 
-DESCRIPTION=${SERVICE:?SERVICE var required}_`hostname`
+: ${SERVICE:?SERVICE var required}
+DESCRIPTION=${SERVICE}_${HOSTNAME}
 
 # Ensure config/secret is bound to myself
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$')
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$")
-docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG} ${dSECRET:+--secret-rm $dSECRET --secret-add $dSECRET}
+docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}
 
 # Source some variables
+. /var/run/secrets/$STACK || true
 . /var/run/secrets/$SERVICE || true
 . /runner || true
 
