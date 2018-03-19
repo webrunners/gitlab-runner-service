@@ -60,6 +60,7 @@ if [[ $TAG_LIST ]]; then
     OPTIONS+=" --tag-list $TAG_LIST"
 fi
 
+export DESCRIPTION EXECUTOR SERVICE STACK TAG_LIST
 
 # Main
 gitlab-runner register${OPTIONS} --executor $EXECUTOR -u $URL -r $TOKEN -n --description "$DESCRIPTION" --locked
