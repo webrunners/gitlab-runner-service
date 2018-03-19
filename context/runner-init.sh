@@ -53,8 +53,8 @@ docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $
 . /var/run/secrets/$SERVICE || true
 . /runner || true
 
-export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?CI_SERVER_URL required}}
-export CI_SERVER_TOKEN=${TOKEN:-${CI_SERVER_TOKEN:?CI_SERVER_TOKEN required}}
+export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
+export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One of TOKEN, REGISTRATION_TOKEN, CI_SERVER_TOKEN required}}}
 export RUNNER_EXECUTOR=${EXECUTOR:-${RUNNER_EXECUTOR:-shell}}
 
 # Misc options
