@@ -37,28 +37,19 @@ usermod -a -G docker gitlab-runner
 
 # You could use this in stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
-# compose does not support go template
-if [[ $STACK == {* ]]; then
-    unset STACK
+STACK=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
+if [[ ! $SERVICE ]]; then
+    SERVICE=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
 fi
-# try to get the stack name
-if [[ ! $STACK ]]; then
-    STACK=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
-fi
-
-# For backwards compat keep the SERVICE var
-SERVICE=${SERVICE:-${STACK:-${COMPOSE_PROJECT_NAME:?Any of SERVICE, STACK, COMPOSE_PROJECT_NAME is needed.}}_runner}
+DESCRIPTION=${SERVICE:?SERVICE var required}_`hostname`
 
 # Ensure config/secret is bound to myself
-docker service update dashboards_portainer --config-add defaults.runner||true
-docker service update dashboards_portainer --secret-add $SERVICE||true
+docker service update $SERVICE --config-add runner||true
+docker service update $SERVICE --secret-add $SERVICE||true
 
 # Source some variables
 . /var/run/secrets/$SERVICE || true
-. /defaults.runner || true
-
-# Bartizado
-DESCRIPTION=${SERVICE:+${SERVICE}_}`hostname`
+. /runner || true
 
 # Misc options
 if [[ $EXECUTOR == 'docker' ]]; then
