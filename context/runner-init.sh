@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# relies on exported EXECUTOR URL TOKEN
+set -a
 
 CONFIG_DIR=/etc/gitlab-runner
 OPTIONS=
@@ -43,8 +43,9 @@ if [[ $STACK == {* ]]; then
 fi
 # try to get the stack name
 if [[ ! $STACK ]]; then
-    STACK=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
+    STACK=$(docker inspect `hostname` --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
 fi
+
 # For backwards compat keep the SERVICE var
 SERVICE=${SERVICE:-${STACK:-${COMPOSE_PROJECT_NAME:?Any of SERVICE, STACK, COMPOSE_PROJECT_NAME is needed.}}_runner}
 
