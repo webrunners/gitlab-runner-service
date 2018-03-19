@@ -31,7 +31,7 @@ usermod -a -G docker gitlab-runner
 
 
 CONFIG_DIR=/etc/gitlab-runner
-# STACK=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
+STACK=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
 
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
@@ -45,7 +45,8 @@ DESCRIPTION=${SERVICE}_${HOSTNAME}
 # Ensure config/secret is bound to myself
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$')
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$")
-docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}
+dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$")
+docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT}
 
 # Source some variables
 . /var/run/secrets/$STACK || true
