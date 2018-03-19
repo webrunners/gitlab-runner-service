@@ -38,7 +38,7 @@ usermod -a -G docker gitlab-runner
 # You could use this in stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
 # compose does not support go template
-if [[ $STACK == {* }]]; then
+if [[ $STACK == {* ]]; then
     unset STACK
 fi
 # try to get the stack name
