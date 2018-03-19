@@ -1,4 +1,4 @@
-version: "3.1"
+version: "3."
 services:
 
   runner:
@@ -6,10 +6,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - SERVICE
+      - COMPOSE_PROJECT_NAME
       - EXECUTOR
-      - URL
       - TOKEN
       - TAG_LIST
+      - URL
     deploy:
       replicas: 1
