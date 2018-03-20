@@ -16,13 +16,9 @@ services:
       replicas: 3
       labels:
         com.df.notify: "true"
-        com.df.service_port: "$SERVICE_PORT"
+        com.df.service_port: "8000"
         com.df.domain: "$DOMAIN"
 
 networks:
   proxy:
     external: true
-
-# secrets:
-#   main.htpasswd:
-#     external: true

@@ -26,7 +26,7 @@ echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner
 chmod 0400 /etc/sudoers.d/gitlab-runner
 
 # Ensure docker run permissions
-groupadd -g `stat -c"%g" /var/run/docker.sock` docker||true
+groupadd -g `stat -c"%g" /var/run/docker.sock` docker || true
 usermod -a -G docker gitlab-runner
 
 
@@ -39,14 +39,14 @@ if [[ ! "${SERVICE:-}" ]]; then
     SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
 fi
 
-: ${SERVICE:?SERVICE var required}
+: ${SERVICE:?SERVICE required}
 DESCRIPTION=${SERVICE}_${HOSTNAME}
 
 # Ensure config/secret is bound to myself
-dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$')
-dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$")
-dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$")
-docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT}
+dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$') || true
+dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
+dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
+docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
 
 # Source some variables
 . /var/run/secrets/$STACK || true
@@ -58,7 +58,7 @@ export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One 
 export RUNNER_EXECUTOR=${EXECUTOR:-${RUNNER_EXECUTOR:-shell}}
 
 # Misc options
-if [[ $EXECUTOR == 'docker' ]]; then
+if [[ $RUNNER_EXECUTOR == 'docker' ]]; then
     OPTIONS+=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
 fi
 
