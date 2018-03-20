@@ -1,24 +1,12 @@
 #!/bin/bash
 
-_get_registered_tokens(){
-    local tokens
-    tokens=$(grep token $CONFIG_DIR/config.toml | cut -d\" -f2)
-    echo $tokens
-}
-
 unregister(){
-    gitlab-runner unregister --url $URL --token $1
+    gitlab-runner unregister --all-runners
 }
 
-unregister_all(){
-    local token
-    for token in $(_get_registered_tokens); do
-        unregister $token
-    done
-}
 
 # Ensure clean removal from gitlab in most cases
-trap unregister_all SIGINT SIGTERM SIGHUP EXIT  # cannot be caught: SIGKILL SIGSTOP
+trap unregister SIGINT SIGTERM SIGHUP EXIT  # cannot be caught: SIGKILL SIGSTOP
 
 # Ensure sudo rights
 touch /etc/sudoers.d/gitlab-runner
