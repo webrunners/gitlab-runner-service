@@ -20,6 +20,8 @@ usermod -a -G docker gitlab-runner
 
 CONFIG_DIR=/etc/gitlab-runner
 STACK=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
+NODE_ID=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')
+NODE=$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')
 
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
@@ -28,7 +30,7 @@ if [[ ! "${SERVICE:-}" ]]; then
 fi
 
 : ${SERVICE:?SERVICE required}
-DESCRIPTION=${SERVICE}_${HOSTNAME}
+DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$') || true
