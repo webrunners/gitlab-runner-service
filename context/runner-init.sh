@@ -30,6 +30,7 @@ if [[ ! "${SERVICE:-}" ]]; then
 fi
 
 : ${SERVICE:?SERVICE required}
+: ${NODE:?NODE required}
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
@@ -41,6 +42,7 @@ docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $
 # Source some variables
 . /var/run/secrets/$STACK || true
 . /var/run/secrets/$SERVICE || true
+. /runner.defaults || true
 . /runner || true
 
 export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
