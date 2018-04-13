@@ -35,15 +35,16 @@ DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$') || true
+dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
 dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
 docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
 
 # Source some variables
-. /var/run/secrets/$STACK || true
-. /var/run/secrets/$SERVICE || true
-. /runner.defaults || true
-. /runner || true
+. /var/run/secrets/$STACK || echo /var/run/secrets/$STACK found
+. /var/run/secrets/$SERVICE || echo /var/run/secrets/$SERVICE found
+. /runner.defaults || echo /runner.defaults found
+. /runner || echo /runner found
 
 export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
 export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One of TOKEN, REGISTRATION_TOKEN, CI_SERVER_TOKEN required}}}
@@ -62,4 +63,4 @@ fi
 # Main
 gitlab-runner register${OPTIONS:+ $OPTIONS} -n --description "$DESCRIPTION" --locked  # --executor ${EXECUTOR:-shell} -u ${URL:?URL required} -r ${TOKEN:?TOKEN required}
 
-/entrypoint $@
+exec /entrypoint $@
