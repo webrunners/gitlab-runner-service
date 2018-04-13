@@ -31,6 +31,8 @@ fi
 
 : ${SERVICE:?SERVICE required}
 : ${NODE:?NODE required}
+
+# Baptize
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
@@ -38,13 +40,15 @@ dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$') || true
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
 dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
+
+echo -n "update: "
 docker service update $SERVICE -d ${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
 
 # Source some variables
-. /var/run/secrets/$STACK || echo /var/run/secrets/$STACK found
-. /var/run/secrets/$SERVICE || echo /var/run/secrets/$SERVICE found
-. /runner.defaults || echo /runner.defaults found
-. /runner || echo /runner found
+. /var/run/secrets/$STACK && echo /var/run/secrets/$STACK found || true
+. /var/run/secrets/$SERVICE && echo /var/run/secrets/$SERVICE found || true
+. /runner.defaults && echo /runner.defaults found || true
+. /runner && echo /runner found || true
 
 export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
 export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One of TOKEN, REGISTRATION_TOKEN, CI_SERVER_TOKEN required}}}
