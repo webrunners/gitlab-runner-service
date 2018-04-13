@@ -21,8 +21,6 @@ RUN apt-get update -yq && apt-get dist-upgrade -yq && apt-get install -yq --no-i
     rm -rf /var/tmp/* &&\
     rm -rf /tmp/*
 
-
-ENV URL=CI-SERVER-URL TOKEN=CI-SERVER-TOKEN EXECUTOR=shell
 COPY ./context/runner-init.sh /
 RUN chmod a+x /runner-init.sh
 
