@@ -51,12 +51,13 @@ fi
 
 VOLUMES_OPTION=()
 VOLUMES=${VOLUMES// /}
-VOLUMES=(${VOLUMES//;/ })
+VOLUMES=(${VOLUMES//,/ })
 if [[ "$VOLUMES" ]]; then
     for volume in ${VOLUMES[@]}; do
-        VOLUMES_OPTION+=("--mount-add $volume")
+        VOLUMES_OPTION+=("--mount-add type=volume,source=$volume,target=/$volume")
     done
 fi
+
 
 echo -n "updating stack $STACK service: "
 set -x
