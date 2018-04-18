@@ -36,9 +36,17 @@ fi
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
+MAINTAIN=$(docker config ls --format {{.Name}}|grep '^runner.maintain$') || true
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
-dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
-dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
+dSECRET=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
+
+
+if [[ $MAINTAIN ]]; then
+    echo docker config runner.maintain found
+    echo Not auto adding runner.defaults, docker secret <stack_name>, nor mounting volumes
+    echo Maintain those files and remove runner.maintain again.
+    exit 1
+fi
 
 
 VOLUMES_OPTION=()
@@ -46,14 +54,18 @@ VOLUMES=${VOLUMES// /}
 VOLUMES=(${VOLUMES//;/ })
 if [[ "$VOLUMES" ]]; then
     for volume in ${VOLUMES[@]}; do
-        VOLUMES_OPTION+=("--mount-rm $volume --mount-add $volume")
+        VOLUMES_OPTION+=("--mount-add $volume")
     done
 fi
 
+# TODO
+# to be able to update config files like runner.defaults
+# we have to find a way. Otherwise auto adding will prevent us from doing this.
+# E.g. wait some time, before self updating. Or totally rely on manually adding those configs/secrets
 
 echo -n "update: "
 set -x
-docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]} }${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
+docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]}}${dCONFIG:+ --config-add $dCONFIG}${dSECRET:+ --secret-add $dSECRET} || true
 
 # Source some variables
 . /var/run/secrets/$STACK && echo /var/run/secrets/$STACK found || true
