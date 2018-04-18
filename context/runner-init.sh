@@ -67,4 +67,5 @@ fi
 # Main
 gitlab-runner register${OPTIONS:+ $OPTIONS} -n --description "$DESCRIPTION" --locked  # --executor ${EXECUTOR:-shell} -u ${URL:?URL required} -r ${TOKEN:?TOKEN required}
 
-exec /entrypoint $@
+# Must not be exec'ed. Otherwise the trap won't unregister the runner
+/entrypoint $@
