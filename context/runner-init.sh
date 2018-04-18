@@ -37,7 +37,7 @@ DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner$') || true
-dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
+dCONFIG=${dCONFIG:-$(docker config ls --format {{.Name}}|grep '^runner.defaults$' || true)}
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
 dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
 
