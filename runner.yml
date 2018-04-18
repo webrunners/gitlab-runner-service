@@ -13,5 +13,6 @@ services:
       - TOKEN
       - TAG_LIST
       - URL
+      - VOLUMES
     deploy:
       replicas: 1
