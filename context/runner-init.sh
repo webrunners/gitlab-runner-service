@@ -40,18 +40,19 @@ dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${SERVICE}$") || true
 dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
 
-VOLUMES=${VOLUMES//, /}
-VOLUMES_OPTION=
+
+VOLUMES_OPTION=()
+VOLUMES=($VOLUMES)
 if [[ "$VOLUMES" ]]; then
-    for volume in $VOLUMES; do
-        VOLUMES_OPTION+="-v $volume"
+    for volume in ${VOLUMES[@]}; do
+        VOLUMES_OPTION+=("--mount-rm $volume --mount-add $volume")
     done
 fi
 
 
 echo -n "update: "
 set -x
-docker service update $SERVICE -d ${VOLUMES_OPTION:+ $VOLUMES_OPTION }${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
+docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]} }${dCONFIG:+--config-rm $dCONFIG --config-add $dCONFIG}${dSECRET:+ --secret-rm $dSECRET --secret-add $dSECRET}${dSECRET_ALT:+ --secret-rm $dSECRET_ALT --secret-add $dSECRET_ALT} || true
 
 # Source some variables
 . /var/run/secrets/$STACK && echo /var/run/secrets/$STACK found || true
