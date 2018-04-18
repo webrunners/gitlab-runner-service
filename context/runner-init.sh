@@ -42,7 +42,8 @@ dSECRET_ALT=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
 
 
 VOLUMES_OPTION=()
-VOLUMES=($VOLUMES)
+VOLUMES=${VOLUMES// /}
+VOLUMES=(${VOLUMES//;/ })
 if [[ "$VOLUMES" ]]; then
     for volume in ${VOLUMES[@]}; do
         VOLUMES_OPTION+=("--mount-rm $volume --mount-add $volume")
