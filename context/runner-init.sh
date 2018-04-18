@@ -58,20 +58,14 @@ if [[ "$VOLUMES" ]]; then
     done
 fi
 
-# TODO
-# to be able to update config files like runner.defaults
-# we have to find a way. Otherwise auto adding will prevent us from doing this.
-# E.g. wait some time, before self updating. Or totally rely on manually adding those configs/secrets
-
-echo -n "update: "
+echo -n "updating stack $STACK service: "
 set -x
 docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]}}${dCONFIG:+ --config-add $dCONFIG}${dSECRET:+ --secret-add $dSECRET} || true
+set +x
 
 # Source some variables
-. /var/run/secrets/$STACK && echo /var/run/secrets/$STACK found || true
-. /var/run/secrets/$SERVICE && echo /var/run/secrets/$SERVICE found || true
-. /runner.defaults && echo /runner.defaults found || true
-set +x
+. /var/run/secrets/$STACK && echo /var/run/secrets/$STACK found || true && echo /var/run/secrets/$STACK NOT found
+. /runner.defaults && echo /runner.defaults found || true && echo /runner.defaults NOT found
 
 export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
 export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One of TOKEN, REGISTRATION_TOKEN, CI_SERVER_TOKEN required}}}
