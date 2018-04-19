@@ -18,6 +18,7 @@ services:
         com.df.notify: "true"
         com.df.service_port: "8000"
         com.df.domain: "$DOMAIN"
+        com.df.no_auth: "${NO_AUTH:-0}"
 
 networks:
   proxy:
