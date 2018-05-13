@@ -6,11 +6,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - CONFIGS
       - EXECUTOR
-      - NODE
       - OPTIONS
-      - SECRETS
       - SERVICE
       - TOKEN
       - TAG_LIST
