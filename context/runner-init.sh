@@ -19,9 +19,10 @@ usermod -a -G docker gitlab-runner
 
 
 CONFIG_DIR=/etc/gitlab-runner
-STACK=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')
-NODE_ID=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')
-NODE=$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')
+STACK="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')"
+NODE_ID="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')"
+NODE="$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')"
+[[ ! $NODE ]] && NODE="$(curl myip.webrunners.de)"
 
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
@@ -31,6 +32,7 @@ fi
 
 : ${SERVICE:?SERVICE required}
 : ${NODE:?NODE required}
+: ${STACK:-$SERVICE}
 
 # Baptize
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
@@ -46,6 +48,8 @@ if [[ $MAINTAIN ]]; then
     echo Not auto adding runner.defaults, docker secret <stack_name>, nor mounting volumes
     echo Maintain those files and remove runner.maintain again.
     exit 1
+else
+    echo add config runner.maintain to prevent auto adding configs and volumes
 fi
 
 
