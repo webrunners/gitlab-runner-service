@@ -17,3 +17,6 @@ services:
         com.df.service_port: "8000"
         com.df.domain: "$DOMAIN"
         com.df.no_auth: "${NO_AUTH:-0}"
+        com.df.staging: "${STAGING:-1}"
+        com.df.issue: "${ISSUE:-1}"
+        com.df.autosign: "${AUTOSIGN:-1}"
