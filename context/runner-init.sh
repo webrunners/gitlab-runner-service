@@ -20,9 +20,12 @@ usermod -a -G docker gitlab-runner
 
 CONFIG_DIR=/etc/gitlab-runner
 STACK="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')"
-NODE_ID="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')"
-NODE="$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')"
-[[ ! $NODE ]] && NODE="$(curl myip.webrunners.de)"
+
+if [[ ! $NODE ]]; then
+    NODE_ID="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')"
+    NODE="$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')"
+    [[ ! $NODE ]] && NODE="$(curl myip.webrunners.de)"
+fi
 
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
