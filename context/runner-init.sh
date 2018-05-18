@@ -1,5 +1,7 @@
 #!/bin/bash
 
+__bool(){ [[ "$(echo ${1:-0}|tr a-z A-Z)" =~ ^(YES|JA|TRUE|[YJ1])$ ]] || return 1; }
+
 unregister(){
     gitlab-runner unregister --all-runners
 }
@@ -41,18 +43,15 @@ fi
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 # Ensure config/secret is bound to myself
-MAINTAIN=$(docker config ls --format {{.Name}}|grep '^runner.maintain$') || true
+__bool ${MAINTAIN:-} && MAINTAIN=1 || MAINTAIN=
 dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
 dSECRET=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
 
 
 if [[ $MAINTAIN ]]; then
-    echo docker config runner.maintain found
-    echo Not auto adding runner.defaults, docker secret <stack_name>, nor mounting volumes
-    echo Maintain those files and remove runner.maintain again.
+    echo Maintenance mode.
+    echo Not auto adding $dCONFIG, nor $dSECRET, nor mounting volumes
     exit 1
-else
-    echo add config runner.maintain to prevent auto adding configs and volumes
 fi
 
 
