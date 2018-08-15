@@ -12,3 +12,10 @@ services:
           cpus: '0.05'
           memory: 10M
       replicas: 3
+    networks:
+      - default
+      - proxy_teststack
+
+networks:
+  proxy_teststack:
+    external: true
