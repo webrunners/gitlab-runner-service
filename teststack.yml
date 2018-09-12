@@ -18,4 +18,3 @@ services:
 
 networks:
   proxy_teststack:
-    external: true
