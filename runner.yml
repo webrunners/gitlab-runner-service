@@ -5,14 +5,32 @@ services:
     image: webrunners/gitlab-runner-service:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - /html:/html  # Add additional bind mounts
     environment:
-      - EXECUTOR
-      - MAINTAIN
-      - OPTIONS
-      - SERVICE
-      - TAG_LIST
-      - TOKEN
-      - URL
-      - VOLUMES
+      - EXECUTOR  # docker|shell [default: shell]
+      - OPTIONS  # Additional gitlab-runner options
+      - TAG_LIST  # Comma separated list of GitLab runner tags
+      - URL  # You could paste the CI_SERVER_URL here instead of using CONFIG
+      - CONFIG=/runner.defaults  # defaults to no config
+      - SECRET=create_a_secret_for_me  # defaults to stackname
     deploy:
       replicas: 1
+    configs:
+      - source: runner.defaults
+        target: /runner.defaults
+    secrets:
+      - create_a_secret_for_me
+
+configs:
+  # This config should already exist
+  # It should contain at least following line
+  # URL=<URL from GitLabCI Runner settings>
+  runner.defaults:
+    external: true
+
+secrets:
+  # defaults to stackname
+  # This secret should contain at least following line
+  # TOKEN=<Token from GitLabCI Runner settings>
+  create_a_secret_for_me:
+    external: true
