@@ -16,8 +16,8 @@ services:
     deploy:
       replicas: 1
     configs:
-      - source: runner.defaults
-        target: /runner.defaults
+      - source: ${CONFIG:-runner.defaults}
+        target: /${CONFIG:-runner.defaults}
     secrets:
       - ${SECRET:-create_a_secret_for_me}
 
@@ -25,12 +25,14 @@ configs:
   # This config should already exist
   # It should contain at least following line
   # URL=<URL from GitLabCI Runner settings>
-  ${CONFIG:-runner.defaults}:
+  runner.defaults:
+    name: ${CONFIG:-runner.defaults}
     external: true
 
 secrets:
   # defaults to stackname
   # This secret should contain at least following line
   # TOKEN=<Token from GitLabCI Runner settings>
-  ${SECRET:-create_a_secret_for_me}:
+  runner.secrets:
+    name: ${SECRET:-create_a_secret_for_me}
     external: true
