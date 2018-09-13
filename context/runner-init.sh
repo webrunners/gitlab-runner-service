@@ -23,74 +23,95 @@ usermod -a -G docker gitlab-runner
 
 # Get the stackname
 STACK="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.stack.namespace"}}')"
-
 # Get the name of the node
 if [[ ! "${NODE:-}" ]]; then
     NODE_ID="$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.node.id"}}')"
     NODE="$(docker node inspect $NODE_ID --format '{{.Description.Hostname}}')"
     [[ ! $NODE ]] && NODE="$(curl myip.webrunners.de)"
 fi
-
 # Get the name of the service
 # You could use this under stack files environment tag:
 #  - STACK={{index .Service.Labels "com.docker.stack.namespace"}}  # - STACK={{printf "%#v" .}}
-if [[ ! "${SERVICE:-}" ]]; then
-    SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
-fi
+SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.swarm.service.name"}}')
 
-: ${SERVICE:?SERVICE required}
-: ${NODE:?NODE required}
 : ${STACK:-$SERVICE}
-: ${SECRET:-$STACK}
+: ${NODE:?Error: NODE required. This might not be a docker swarm}
+: ${SERVICE:?Error: SERVICE required. This might not be a docker swarm}
 
 # Baptize
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
-# Ensure config/secret is bound to myself
-# Deprecated
-# __bool ${MAINTAIN:-} && MAINTAIN=1 || MAINTAIN=
-# dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
-# dSECRET=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
-# if [[ $MAINTAIN ]]; then
-#     echo Maintenance mode.
-#     echo Not mounting volumes
-#     exit 1
-# fi
+## Ensure configs/secrets
 
-# VOLUMES_OPTION=()
-# VOLUMES=${VOLUMES// /}
-# VOLUMES=(${VOLUMES//,/ })
-# if [[ "$VOLUMES" ]]; then
-#     for volume in ${VOLUMES[@]}; do
-#         VOLUMES_OPTION+=("--mount-add type=volume,source=$volume,target=/$volume")
-#     done
-# fi
+__bool ${MAINTAIN:-} && MAINTAIN=1 || MAINTAIN=
+if [[ $MAINTAIN ]]; then
+    echo MAINTAIN: Disabled self update
 
-# echo -n "updating stack $STACK service: "
-# set -x
-# docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]}}${dCONFIG:+ --config-add $dCONFIG}${dSECRET:+ --secret-add $dSECRET} || true
-# set +x
+    # Source some variables
+    if [[ ! "$URL" ]]; then
+        if [[ "$URL_CONFIG" ]]; then
+            URL_CONFIG_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Configs|.[]|select(.ConfigName==\"$URL_CONFIG\")|.File.Name" -r)
+        fi
+        : ${URL_CONFIG:?Error: URL_CONFIG required}
+        URL=$(<$URL_CONFIG_FILE)
+    fi
 
+    if [[ ! "$TOKEN" ]]; then
+        if [[ $TOKEN_SECRET ]]; then
+            TOKEN_SECRET_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Secrets|.[]|select(.SecretName==\"$TOKEN_SECRET\")|.File.Name" -r)
+        fi
+        : ${TOKEN_SECRET:?Error: TOKEN_SECRET required}
+        TOKEN=$(<$TOKEN_SECRET_FILE)
+    fi
 
-# Source some variables
-for source in /var/run/secrets/$SECRET${CONFIG:+ ${CONFIG}}; do
-    test -f $source || echo "Error: Required file not found: $source"
-    . $source
-done
+else
+    dCONFIG=$(docker config ls --format {{.Name}}|grep '^runner.defaults$') || true
+    dSECRET=$(docker secret ls --format {{.Name}}|grep "^${STACK}$") || true
+
+    VOLUMES_OPTION=()
+    VOLUMES=${VOLUMES// /}
+    VOLUMES=(${VOLUMES//,/ })
+    if [[ "$VOLUMES" ]]; then
+        for volume in ${VOLUMES[@]}; do
+            VOLUMES_OPTION+=("--mount-add type=volume,source=$volume,target=/$volume")
+        done
+    fi
+
+    echo -n "Selfupdating stack: $STACK. service: $SERVICE"
+    set -x
+    docker service update $SERVICE -d ${VOLUMES_OPTION:+ ${VOLUMES_OPTION[@]}}${dCONFIG:+ --config-add $dCONFIG}${dSECRET:+ --secret-add $dSECRET} || true
+    set +x
+
+    # Source some variables
+    if test -f /var/run/secrets/$STACK; then
+        echo /var/run/secrets/$STACK found
+        . /var/run/secrets/$STACK
+    else
+        echo Warning: /var/run/secrets/$STACK missing
+    fi
+
+    if test -f /runner.defaults; then
+        echo /runner.defaults found
+        . /runner.defaults
+    else
+        echo Warning: /runner.defaults missing
+    fi
+fi
+
+## Startup sequence
 
 export CI_SERVER_URL=${URL:-${CI_SERVER_URL:?One of URL, CI_SERVER_URL required}}
 export REGISTRATION_TOKEN=${TOKEN:-${REGISTRATION_TOKEN:-${CI_SERVER_TOKEN:?One of TOKEN, REGISTRATION_TOKEN, CI_SERVER_TOKEN required}}}
 export RUNNER_EXECUTOR=${EXECUTOR:-${RUNNER_EXECUTOR:-shell}}
 
 # Misc options
-if [[ $RUNNER_EXECUTOR == 'docker' ]]; then
+if [[ "$RUNNER_EXECUTOR" == 'docker' ]]; then
     OPTIONS+=" --docker-image docker:latest --docker-volumes /var/run/docker.sock:/var/run/docker.sock"
 fi
 
-if [[ $TAG_LIST ]]; then
+if [[ "$TAG_LIST" ]]; then
     OPTIONS+=" --tag-list ${TAG_LIST// /,}"
 fi
-
 
 # Main
 gitlab-runner register${OPTIONS:+ $OPTIONS} -n --description "$DESCRIPTION" --locked  # --executor ${EXECUTOR:-shell} -u ${URL:?URL required} -r ${TOKEN:?TOKEN required}

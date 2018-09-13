@@ -5,34 +5,31 @@ services:
     image: webrunners/gitlab-runner-service:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # - /html:/html  # Add additional bind mounts
     environment:
       - EXECUTOR  # docker|shell [default: shell]
+      - MAINTAIN  # Disable selfupdate service with default-config, stack-named secret and volumes
       - OPTIONS  # Additional gitlab-runner options
       - TAG_LIST  # Comma separated list of GitLab runner tags
-      - URL  # You could paste the CI_SERVER_URL here instead of using CONFIG
-      - CONFIG=/${CONFIG:-runner.defaults}  # defaults to no config
-      - SECRET=${SECRET:-create_a_secret_for_me}  # defaults to stackname
+      - TOKEN  # Provide CI_SERVER_TOKEN as variable. Possibly unsecure
+      - URL  # Provide CI_SERVER_URL. Possibly provided by default config
+      - VOLUMES  # Not in MAINTAIN: Comma separated list of volumes, that will be simple mounted like volumename:/volumename
+      - URL_CONFIG  # MAINTAIN only: Name of the config that contains the CI_SERVER_URL only
+      - TOKEN_SECRET  # MAINTAIN only: Name of the config that contains the CI_SERVER_TOKEN only
     deploy:
       replicas: 1
-    configs:
-      - source: ${CONFIG:-runner.defaults}
-        target: /${CONFIG:-runner.defaults}
-    secrets:
-      - ${SECRET:-create_a_secret_for_me}
+#     configs:
+#       - source: ${URL_CONFIG}
+#     secrets:
+#       - source: ${TOKEN_SECRET}
 
-configs:
-  # This config should already exist
-  # It should contain at least following line
-  # URL=<URL from GitLabCI Runner settings>
-  runner.defaults:
-    name: ${CONFIG:-runner.defaults}
-    external: true
+# configs:
+#   # <CI_SERVER_URL from GitLabCI Runner settings>
+#   CI_SERVER_URL:
+#     external: true
+#       name: ${URL_CONFIG}
 
-secrets:
-  # defaults to stackname
-  # This secret should contain at least following line
-  # TOKEN=<Token from GitLabCI Runner settings>
-  runner.secrets:
-    name: ${SECRET:-create_a_secret_for_me}
-    external: true
+# secrets:
+#   # <Token from GitLabCI Runner settings>
+#   CI_SERVER_TOKEN:
+#     external: true
+#       name: ${TOKEN_SECRET}
