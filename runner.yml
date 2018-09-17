@@ -12,9 +12,9 @@ services:
       - TAG_LIST  # Comma separated list of GitLab runner tags
       - TOKEN  # Provide CI_SERVER_TOKEN as variable. Possibly unsecure
       - URL  # Provide CI_SERVER_URL. Possibly provided by default config
-      - VOLUMES  # Not in MAINTAIN: Comma separated list of volumes, that will be simple mounted like volumename:/volumename
-      - URL_CONFIG  # MAINTAIN only: Name of the config that contains the CI_SERVER_URL only
-      - TOKEN_SECRET  # MAINTAIN only: Name of the config that contains the CI_SERVER_TOKEN only
+      - VOLUMES  # DISABLE_SELFUPDATE does not: Comma separated list of volumes, that will be simple mounted like volumename:/volumename
+      - URL_CONFIG  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_URL only
+      - TOKEN_SECRET  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_TOKEN only
     deploy:
       replicas: 1
 #     configs:
