@@ -14,7 +14,7 @@ services:
       - URL  # Provide CI_SERVER_URL. Possibly provided by default config
       - VOLUMES  # DISABLE_SELFUPDATE does not: Comma separated list of volumes, that will be simple mounted like volumename:/volumename
       - URL_CONFIG  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_URL only
-      - TOKEN_SECRET  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_TOKEN only
+      - TOKEN_SECRET  # DISABLE_SELFUPDATE requires: Name of the secret that contains the CI_SERVER_TOKEN only
     deploy:
       replicas: 1
 #     configs:
