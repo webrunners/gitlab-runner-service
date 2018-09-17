@@ -2,12 +2,12 @@ version: "3.6"
 services:
 
   runner:
-    image: webrunners/gitlab-runner-service:latest
+    image: webrunners/gitlab-runner-service:1.4
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
+      - BETA  # Disable selfupdate service with default-config, stack-named secret and volumes
       - EXECUTOR  # docker|shell [default: shell]
-      - MAINTAIN  # Disable selfupdate service with default-config, stack-named secret and volumes
       - OPTIONS  # Additional gitlab-runner options
       - TAG_LIST  # Comma separated list of GitLab runner tags
       - TOKEN  # Provide CI_SERVER_TOKEN as variable. Possibly unsecure
@@ -18,18 +18,20 @@ services:
     deploy:
       replicas: 1
 #     configs:
-#       - source: ${URL_CONFIG}
+#       - source: CI_SERVER_URL
+#         target: /${URL_CONFIG}
 #     secrets:
-#       - source: ${TOKEN_SECRET}
+#       - source: CI_SERVER_TOKEN
+#         target: /run/secrets/${TOKEN_SECRET}
 
 # configs:
 #   # <CI_SERVER_URL from GitLabCI Runner settings>
 #   CI_SERVER_URL:
 #     external: true
-#       name: ${URL_CONFIG}
+#     name: ${URL_CONFIG}
 
 # secrets:
 #   # <Token from GitLabCI Runner settings>
 #   CI_SERVER_TOKEN:
 #     external: true
-#       name: ${TOKEN_SECRET}
+#     name: ${TOKEN_SECRET}

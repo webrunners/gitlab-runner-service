@@ -10,14 +10,15 @@ unregister(){
 # Ensure clean removal from gitlab in most cases
 trap unregister SIGINT SIGTERM SIGHUP EXIT  # cannot be caught: SIGKILL SIGSTOP
 
-# Ensure sudo rights
-touch /etc/sudoers.d/gitlab-runner
-echo '%gitlab-runner ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gitlab-runner
-chmod 0400 /etc/sudoers.d/gitlab-runner
-
 # Ensure docker run permissions
 groupadd -g `stat -c"%g" /var/run/docker.sock` docker || true
 usermod -a -G docker gitlab-runner
+
+
+if [[ $DEBUG ]]; then
+    tail -f /var/log/lastlog
+fi
+
 
 ## Build runners name
 
@@ -43,25 +44,33 @@ DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 ## Ensure configs/secrets
 
-__bool ${MAINTAIN:-} && MAINTAIN=1 || MAINTAIN=
-if [[ $MAINTAIN ]]; then
-    echo MAINTAIN: Disabled self update
+__bool ${BETA:-} && BETA=1 || BETA=
+if [[ $BETA ]]; then
+    echo BETA: Disabled self update
 
     # Source some variables
-    if [[ ! "$URL" ]]; then
+    if [[ ! "$URL" || "$URL" != URL ]]; then
         if [[ "$URL_CONFIG" ]]; then
             URL_CONFIG_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Configs|.[]|select(.ConfigName==\"$URL_CONFIG\")|.File.Name" -r)
         fi
-        : ${URL_CONFIG:?Error: URL_CONFIG required}
-        URL=$(<$URL_CONFIG_FILE)
+        if ! echo $URL_CONFIG_FILE | grep -q  $URL_CONFIG; then
+            echo URL_CONFIG not found. Check stack file for configs
+            exit 1
+        fi
+        URL="$(< $URL_CONFIG_FILE)"
     fi
 
-    if [[ ! "$TOKEN" ]]; then
+
+
+    if [[ ! "$TOKEN" || "$TOKEN" != TOKEN ]]; then
         if [[ $TOKEN_SECRET ]]; then
             TOKEN_SECRET_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Secrets|.[]|select(.SecretName==\"$TOKEN_SECRET\")|.File.Name" -r)
         fi
-        : ${TOKEN_SECRET:?Error: TOKEN_SECRET required}
-        TOKEN=$(<$TOKEN_SECRET_FILE)
+        if ! echo $TOKEN_SECRET_FILE | grep -q  $TOKEN_SECRET; then
+            echo TOKEN_SECRET not found. Check stack file for configs
+            exit 1
+        fi
+        TOKEN="$(< $TOKEN_SECRET_FILE)"
     fi
 
 else
