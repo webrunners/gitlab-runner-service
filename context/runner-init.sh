@@ -39,17 +39,18 @@ SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.
 : ${NODE:?Error: NODE required. This might not be a docker swarm}
 : ${SERVICE:?Error: SERVICE required. This might not be a docker swarm}
 
+__bool ${DISABLE_SELFUPDATE:-} && DISABLE_SELFUPDATE=1 || DISABLE_SELFUPDATE=
+
 # Baptize
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
 
 ## Ensure configs/secrets
 
-__bool ${BETA:-} && BETA=1 || BETA=
-if [[ $BETA ]]; then
-    echo BETA: Disabled self update
+if [[ $DISABLE_SELFUPDATE ]]; then
+    echo DISABLE_SELFUPDATE: Disabled self update
 
     # Source some variables
-    if [[ ! "$URL" || "$URL" != URL ]]; then
+    if [[ ! "$URL" ]]; then
         if [[ "$URL_CONFIG" ]]; then
             URL_CONFIG_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Configs|.[]|select(.ConfigName==\"$URL_CONFIG\")|.File.Name" -r)
         fi
@@ -60,9 +61,7 @@ if [[ $BETA ]]; then
         URL="$(< $URL_CONFIG_FILE)"
     fi
 
-
-
-    if [[ ! "$TOKEN" || "$TOKEN" != TOKEN ]]; then
+    if [[ ! "$TOKEN" ]]; then
         if [[ $TOKEN_SECRET ]]; then
             TOKEN_SECRET_FILE=$(docker inspect $SERVICE | jq ".[]|.Spec.TaskTemplate.ContainerSpec.Secrets|.[]|select(.SecretName==\"$TOKEN_SECRET\")|.File.Name" -r)
         fi

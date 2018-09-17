@@ -2,11 +2,11 @@ version: "3.6"
 services:
 
   runner:
-    image: webrunners/gitlab-runner-service:1.4
+    image: webrunners/gitlab-runner-service:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - BETA  # Disable selfupdate service with default-config, stack-named secret and volumes
+      - DISABLE_SELFUPDATE  # Disable selfupdate service with default-config, stack-named secret and volumes
       - EXECUTOR  # docker|shell [default: shell]
       - OPTIONS  # Additional gitlab-runner options
       - TAG_LIST  # Comma separated list of GitLab runner tags
