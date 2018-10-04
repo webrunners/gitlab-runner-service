@@ -13,16 +13,16 @@ services:
       - TOKEN  # Provide CI_SERVER_TOKEN as variable. Possibly unsecure
       - URL  # Provide CI_SERVER_URL. Possibly provided by default config
       - VOLUMES  # DISABLE_SELFUPDATE does not: Comma separated list of volumes, that will be simple mounted like volumename:/volumename
-      - URL_CONFIG  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_URL only
+      - URL_CONFIG=${URL_CONFIG:-CI_SERVER_URL}  # DISABLE_SELFUPDATE requires: Name of the config that contains the CI_SERVER_URL only
       - TOKEN_SECRET  # DISABLE_SELFUPDATE requires: Name of the secret that contains the CI_SERVER_TOKEN only
     deploy:
       replicas: 1
     configs:
       - source: CI_SERVER_URL
-        target: /${URL_CONFIG}
+        target: /${URL_CONFIG:-CI_SERVER_URL}
     secrets:
       - source: CI_SERVER_TOKEN
-        target: /run/secrets/${TOKEN_SECRET}
+        target: /run/secrets/${TOKEN_SECRET:?TOKEN_SECRET}
 
 configs:
   # <CI_SERVER_URL from GitLabCI Runner settings>
@@ -34,4 +34,4 @@ secrets:
   # <Token from GitLabCI Runner settings>
   CI_SERVER_TOKEN:
     external: true
-    name: ${TOKEN_SECRET}
+    name: ${TOKEN_SECRET:?TOKEN_SECRET}
