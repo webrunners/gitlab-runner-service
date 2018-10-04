@@ -17,21 +17,21 @@ services:
       - TOKEN_SECRET  # DISABLE_SELFUPDATE requires: Name of the secret that contains the CI_SERVER_TOKEN only
     deploy:
       replicas: 1
-#     configs:
-#       - source: CI_SERVER_URL
-#         target: /${URL_CONFIG}
-#     secrets:
-#       - source: CI_SERVER_TOKEN
-#         target: /run/secrets/${TOKEN_SECRET}
+    configs:
+      - source: CI_SERVER_URL
+        target: /${URL_CONFIG}
+    secrets:
+      - source: CI_SERVER_TOKEN
+        target: /run/secrets/${TOKEN_SECRET}
 
-# configs:
-#   # <CI_SERVER_URL from GitLabCI Runner settings>
-#   CI_SERVER_URL:
-#     external: true
-#     name: ${URL_CONFIG}
+configs:
+  # <CI_SERVER_URL from GitLabCI Runner settings>
+  CI_SERVER_URL:
+    external: true
+    name: ${URL_CONFIG:-CI_SERVER_URL}
 
-# secrets:
-#   # <Token from GitLabCI Runner settings>
-#   CI_SERVER_TOKEN:
-#     external: true
-#     name: ${TOKEN_SECRET}
+secrets:
+  # <Token from GitLabCI Runner settings>
+  CI_SERVER_TOKEN:
+    external: true
+    name: ${TOKEN_SECRET}

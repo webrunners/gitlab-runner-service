@@ -39,7 +39,7 @@ SERVICE=$(docker inspect $HOSTNAME --format '{{index .Config.Labels "com.docker.
 : ${NODE:?Error: NODE required. This might not be a docker swarm}
 : ${SERVICE:?Error: SERVICE required. This might not be a docker swarm}
 
-__bool ${DISABLE_SELFUPDATE:-} && DISABLE_SELFUPDATE=1 || DISABLE_SELFUPDATE=
+__bool ${DISABLE_SELFUPDATE:-1} && DISABLE_SELFUPDATE=1 || DISABLE_SELFUPDATE=
 
 # Baptize
 DESCRIPTION=${SERVICE}_${HOSTNAME}@$NODE
