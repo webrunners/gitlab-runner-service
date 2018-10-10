@@ -22,7 +22,7 @@ services:
         target: /${URL_CONFIG:-CI_SERVER_URL}
     secrets:
       - source: CI_SERVER_TOKEN
-        target: /run/secrets/${TOKEN_SECRET:?TOKEN_SECRET}
+        target: /run/secrets/${TOKEN_SECRET}
 
 configs:
   # <CI_SERVER_URL from GitLabCI Runner settings>
@@ -34,4 +34,4 @@ secrets:
   # <Token from GitLabCI Runner settings>
   CI_SERVER_TOKEN:
     external: true
-    name: ${TOKEN_SECRET:?TOKEN_SECRET}
+    name: ${TOKEN_SECRET}
